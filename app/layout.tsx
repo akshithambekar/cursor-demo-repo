@@ -10,7 +10,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Acme Incorporated | Building Tomorrow, Today',
+  title: 'Acme Incorporated | Building tomorrow, Today',
   description: 'Acme Incorporated delivers innovative solutions for businesses worldwide. We help enterprises transform and scale with cutting-edge technology and expert consulting.',
   generator: 'v0.app',
   icons: {

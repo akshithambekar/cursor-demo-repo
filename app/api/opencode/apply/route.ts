@@ -17,16 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const opencodeUrl = 'http://localhost:127.0.0.1:3001';
+    const opencodeUrl = 'http://127.0.0.1:3001';
 
     // Initialize OpenCode client
-    const client = createOpencodeClient({ baseUrl: opencodeUrl });
+    const client = createOpencodeClient({ baseUrl: opencodeUrl, directory: "/Users/liammonaghan/JS/cursor-demo-repo" });
 
     try {
       // Send message to OpenCode via session prompt
-      const sessionResponse = await client.session.create({ body: { title: 'PR Preview Change'}, query: {
-        directory: "/Users/liammonaghan/JS/cursor-demo-repo"
-      } });
+      const sessionResponse = await client.session.create({ body: { title: 'PR Preview Change'},  });
       const sessionId = sessionResponse.data?.id;
 
       if (!sessionId) {
@@ -35,7 +33,7 @@ export async function POST(request: NextRequest) {
 
       const promptResponse = await client.session.prompt({
         path: { id: sessionId },
-        body: { parts: [{ type: 'text', text: message }] }
+        body: { parts: [{ type: 'text', text: message + "MAKE CHANGES IN: /Users/liammonaghan/JS/cursor-demo-repo, ASK ABSOLUTELY NO FOLLOW UP QUESTIONS" }] }
       });
 
       // Get the result from response data
