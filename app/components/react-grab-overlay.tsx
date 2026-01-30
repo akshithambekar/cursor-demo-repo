@@ -49,7 +49,7 @@ Change request: ${changeRequest}`;
             setProcessingState("applying");
 
             // Call the change API
-            const changeResponse = await fetch("/api/opencode/change", {
+            const changeResponse = await fetch("/api/opencode/apply", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -150,27 +150,67 @@ Change request: ${changeRequest}`;
     useEffect(() => {
         if (!isDevelopment || !mounted) return;
 
-        // Initialize react-grab with content capture
+        // Initialize react-grab with content capture plugin
         const initGrab = async () => {
             try {
-                const { init } = await import("react-grab");
+                const { init } = await import("react-grab/core");
                 const api = init();
 
-                // Activate react-grab and set up content capture
+                // Activate react-grab
                 if (typeof api.activate === "function") {
                     api.activate();
                 }
 
-                // Set up content capture callback if available
-                // Using type assertion to access the onGrab callback method
-                const grabApi = api as { onGrab?: (callback: (content: { code: string; filePath: string }) => void) => void };
-                if (typeof grabApi.onGrab === "function") {
-                    grabApi.onGrab((content: { code: string; filePath: string }) => {
-                        setGrabContent({
-                            code: content.code,
-                            filePath: content.filePath,
-                        });
-                        setIsCollapsed(false);
+                // Register plugin to capture copied content
+                // Using type assertion to access the registerPlugin method
+                const grabApi = api as {
+                    registerPlugin?: (plugin: {
+                        name: string;
+                        hooks?: {
+                            onCopySuccess?: (
+                                elements: unknown[],
+                                content: unknown
+                            ) => void;
+                        };
+                    }) => void;
+                };
+
+                if (typeof grabApi.registerPlugin === "function") {
+                    grabApi.registerPlugin({
+                        name: "opencode-chatbox",
+                        hooks: {
+                            onCopySuccess: (_elements, content) => {
+                                // Parse the react-grab content format: "code\n\nin /path/to/file.tsx"
+                                const text = content as string;
+                                if (!text || !text.includes("\nin ")) {
+                                    return;
+                                }
+
+                                const lines = text.split("\n");
+                                const codeLines: string[] = [];
+                                const filePaths: string[] = [];
+
+                                let inFileSection = false;
+                                for (const line of lines) {
+                                    if (line.startsWith("in ")) {
+                                        inFileSection = true;
+                                        filePaths.push(
+                                            line.replace(/^in\s+/, "")
+                                        );
+                                    } else if (!inFileSection) {
+                                        codeLines.push(line);
+                                    }
+                                }
+
+                                const code = codeLines.join("\n").trim();
+                                const filePath = filePaths[0] || "";
+
+                                if (code && filePath) {
+                                    setGrabContent({ code, filePath });
+                                    setIsCollapsed(false);
+                                }
+                            },
+                        },
                     });
                 }
             } catch (error) {
