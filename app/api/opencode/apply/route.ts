@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
 
     try {
       // Send message to OpenCode via session prompt
-      const sessionResponse = await client.session.create({ body: { title: 'PR Preview Change' } });
+      const sessionResponse = await client.session.create({ body: { title: 'PR Preview Change'}, query: {
+        directory: "/Users/liammonaghan/JS/cursor-demo-repo"
+      } });
       const sessionId = sessionResponse.data?.id;
 
       if (!sessionId) {
