@@ -28,6 +28,7 @@ export function ReactGrabOverlay({ children }: { children: React.ReactNode }) {
     const [commitSha, setCommitSha] = useState<string>("");
     const [hasAppliedChange, setHasAppliedChange] = useState(false);
     const chatboxRef = useRef<HTMLDivElement>(null);
+    const reactGrabApiRef = useRef<any>(null);
 
     // Define all callbacks BEFORE any early returns
     const handleApply = useCallback(async () => {
@@ -45,7 +46,7 @@ Change request: ${changeRequest}`;
         try {
             setProcessingState("applying");
 
-            // Call the change API
+            // Call the apply API
             const changeResponse = await fetch("/api/opencode/apply", {
                 method: "POST",
                 headers: {
@@ -141,7 +142,7 @@ Change request: ${changeRequest}`;
         const initGrab = async () => {
             try {
                 const { init } = await import("react-grab/core");
-                init({
+                const api = init({
                     onElementSelect: (element: any) => {
                         setGrabContent({
                             code:
@@ -153,6 +154,7 @@ Change request: ${changeRequest}`;
                         setIsCollapsed(false);
                     },
                 });
+                reactGrabApiRef.current = api;
             } catch (error) {
                 console.error("Failed to initialize react-grab:", error);
             }
@@ -167,6 +169,19 @@ Change request: ${changeRequest}`;
         setIsDevelopment(process.env.NODE_ENV === "development");
         setMounted(true);
     }, []);
+
+    // Deactivate react-grab when chatbox opens
+    useEffect(() => {
+        if (reactGrabApiRef.current) {
+            if (grabContent) {
+                // Deactivate to hide the hover overlay
+                reactGrabApiRef.current.deactivate();
+            } else {
+                // Reactivate when chatbox is closed
+                reactGrabApiRef.current.activate();
+            }
+        }
+    }, [grabContent]);
 
     // Handle escape key to close chatbox
     useEffect(() => {
@@ -216,12 +231,12 @@ Change request: ${changeRequest}`;
                         commitSha={commitSha}
                         hasAppliedChange={hasAppliedChange}
                         isCollapsed={isCollapsed}
-                        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
-                        onChangeRequestChange={setChangeRequest}
-                        onApply={handleApply}
-                        onCommit={handleCommit}
-                        onDismiss={handleDismiss}
-                        onReset={handleReset}
+                        onToggleCollapseAction={() => setIsCollapsed(!isCollapsed)}
+                        onChangeRequestChangeAction={setChangeRequest}
+                        onApplyAction={handleApply}
+                        onCommitAction={handleCommit}
+                        onDismissAction={handleDismiss}
+                        onResetAction={handleReset}
                     />
                 </div>
             )}

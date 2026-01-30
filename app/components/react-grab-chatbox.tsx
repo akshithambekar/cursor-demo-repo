@@ -30,12 +30,12 @@ interface ReactGrabChatboxProps {
     commitSha: string;
     hasAppliedChange: boolean;
     isCollapsed: boolean;
-    onToggleCollapse: () => void;
-    onChangeRequestChange: (value: string) => void;
-    onApply: () => void;
-    onCommit: () => void;
-    onDismiss: () => void;
-    onReset: () => void;
+    onToggleCollapseAction: () => void;
+    onChangeRequestChangeAction: (value: string) => void;
+    onApplyAction: () => void;
+    onCommitAction: () => void;
+    onDismissAction: () => void;
+    onResetAction: () => void;
 }
 
 export function ReactGrabChatbox({
@@ -47,12 +47,12 @@ export function ReactGrabChatbox({
     commitSha,
     hasAppliedChange,
     isCollapsed,
-    onToggleCollapse,
-    onChangeRequestChange,
-    onApply,
-    onCommit,
-    onDismiss,
-    onReset,
+    onToggleCollapseAction,
+    onChangeRequestChangeAction,
+    onApplyAction,
+    onCommitAction,
+    onDismissAction,
+    onResetAction,
 }: ReactGrabChatboxProps) {
     if (!grabContent) {
         return null;
@@ -95,7 +95,7 @@ export function ReactGrabChatbox({
                     </div>
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={onToggleCollapse}
+                            onClick={onToggleCollapseAction}
                             className="p-1 hover:bg-white/20 rounded transition-colors"
                         >
                             {isCollapsed ? (
@@ -105,7 +105,7 @@ export function ReactGrabChatbox({
                             )}
                         </button>
                         <button
-                            onClick={onDismiss}
+                            onClick={onDismissAction}
                             className="p-1 hover:bg-white/20 rounded transition-colors"
                         >
                             <X className="h-4 w-4 text-zinc-500" />
@@ -121,13 +121,13 @@ export function ReactGrabChatbox({
                             placeholder="What would you like to change?"
                             value={changeRequest}
                             onChange={(e) =>
-                                onChangeRequestChange(e.target.value)
+                                onChangeRequestChangeAction(e.target.value)
                             }
                             onKeyDown={(e) => {
                                 if (e.key === "Enter" && !e.shiftKey) {
                                     e.preventDefault();
                                     if (changeRequest.trim() && processingState === "idle") {
-                                        onApply();
+                                        onApplyAction();
                                     }
                                 }
                             }}
@@ -184,7 +184,7 @@ export function ReactGrabChatbox({
                         {/* Apply Button */}
                         <div className="p-3 border-t border-zinc-800">
                             <Button
-                                onClick={onApply}
+                                onClick={onApplyAction}
                                 disabled={
                                     !changeRequest.trim() ||
                                     processingState !== "idle"

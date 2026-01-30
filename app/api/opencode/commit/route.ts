@@ -10,44 +10,58 @@ export async function POST(request: NextRequest) {
 
   try {
     const opencodeUrl = process.env.OPENCODE_SERVER_URL || 'http://localhost:3001';
-    
+
     // Initialize OpenCode client
     const client = createOpencodeClient({ baseUrl: opencodeUrl });
-    
+
     // Hardcoded message to add, commit, and push changes
     const message = 'add, commit, and push changes';
-    
-    // Send message to OpenCode via session prompt
-    const sessionResponse = await client.session.create({ body: { title: 'PR Preview Apply' } });
-    const sessionId = sessionResponse.data?.id;
-    
-    if (!sessionId) {
-      throw new Error('Failed to create session');
+
+    try {
+      // Send message to OpenCode via session prompt
+      const sessionResponse = await client.session.create({ body: { title: 'PR Preview Apply' } });
+      const sessionId = sessionResponse.data?.id;
+
+      if (!sessionId) {
+        throw new Error('Failed to create session');
+      }
+
+      const promptResponse = await client.session.prompt({
+        path: { id: sessionId },
+        body: { parts: [{ type: 'text', text: message }] }
+      });
+
+      // Get the result from response data
+      const result = promptResponse.data?.parts
+        ?.map((part) => {
+          if (part.type === 'text' && 'text' in part) {
+            return part.text;
+          }
+          return '';
+        })
+        .join('') || '';
+
+      return NextResponse.json({
+        success: true,
+        response: result
+      });
+    } catch (fetchError: any) {
+      // Handle connection errors specifically
+      if (fetchError.cause?.code === 'ECONNREFUSED') {
+        return NextResponse.json(
+          {
+            success: false,
+            response: `Cannot connect to OpenCode server at ${opencodeUrl}. Please ensure the OpenCode server is running.`
+          },
+          { status: 503 }
+        );
+      }
+      throw fetchError;
     }
-    
-    const promptResponse = await client.session.prompt({
-      path: { id: sessionId },
-      body: { parts: [{ type: 'text', text: message }] }
-    });
-    
-    // Get the result from response data
-    const result = promptResponse.data?.parts
-      ?.map((part) => {
-        if (part.type === 'text' && 'text' in part) {
-          return part.text;
-        }
-        return '';
-      })
-      .join('') || '';
-    
-    return NextResponse.json({
-      success: true,
-      opencodeResponse: result
-    });
   } catch (error) {
     console.error('OpenCode API error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, response: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
