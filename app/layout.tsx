@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import Script from "next/script"
 import './globals.css'
 import { ReactGrabOverlay } from './components/react-grab-overlay'
 
@@ -38,6 +39,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {process.env.NODE_ENV === "development" && (
+        <Script
+          src="//unpkg.com/react-grab/dist/index.global.js"
+          strategy="beforeInteractive"
+        />
+      )}
       <body className={`font-sans antialiased`}>
         <ReactGrabOverlay>
           {children}
