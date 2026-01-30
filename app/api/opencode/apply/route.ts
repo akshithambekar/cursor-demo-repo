@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const opencodeUrl = process.env.OPENCODE_SERVER_URL || 'http://localhost:3001';
+    const opencodeUrl = 'http://localhost:127.0.0.1:3001';
 
     // Initialize OpenCode client
     const client = createOpencodeClient({ baseUrl: opencodeUrl });
