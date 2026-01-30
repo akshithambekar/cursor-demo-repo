@@ -39,12 +39,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {process.env.NODE_ENV === "development" && (
-        <Script
-          src="//unpkg.com/react-grab/dist/index.global.js"
-          strategy="beforeInteractive"
-        />
-      )}
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            strategy="beforeInteractive"
+          />
+        )}
+      </head>
       <body className={`font-sans antialiased`}>
         <ReactGrabOverlay>
           {children}
